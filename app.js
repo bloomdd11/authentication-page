@@ -9,9 +9,11 @@ const connectDB = require('./db/connectDB')
 
 // routers
 const AuthRouter = require('./routes/auth-route')
+const BlogRouter = require('./routes/blog-route')
 
-// error handler
+// middlewares packages
 const errorHandlerMiddleware = require('./middlewares/error-handler')
+const authenticationMiddleware = require('./middlewares/authentication')
 
 // middlewares
 app.use(express.json())
@@ -21,7 +23,8 @@ app.get('/', (req, res) => {
   res.send('server is running')
 })
 
-app.use('/api/v1', AuthRouter)
+app.use('/api/v1/auth', AuthRouter)
+app.use('/api/v1/blog', authenticationMiddleware, BlogRouter)
 
 app.use(errorHandlerMiddleware)
 

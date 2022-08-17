@@ -3,11 +3,16 @@ const customAPIError = require('../errors/customAPIErrors')
 
 const register = async (req, res) => {
   const { name } = req.body
+
   if (name.length < 3) {
     throw new customAPIError('length of name is short try again', 400)
   }
+
   const user = await User.create(req.body)
-  return res.json(user)
+
+  const token = user.createJWT()
+
+  return res.json({ username: name, token: token })
 }
 
 const login = async (req, res) => {
@@ -27,8 +32,11 @@ const login = async (req, res) => {
     throw new customAPIError('Wrong Password Try Again', 400)
   }
 
-  return res.json(user)
-  return res.json(req.body)
+  const token = user.createJWT()
+
+  //return res.json(user)
+  return res.json({ username: user.name, token: token })
+
 }
 
 const viewUser = async (req, res) => {

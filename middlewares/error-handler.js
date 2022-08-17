@@ -10,6 +10,11 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.statusCode = 400
   }
 
+  if (err.name === 'JsonWebTokenError') {
+    customError.msg = err.message
+    customError.statusCode = 401
+  }
+
   //return res.status(customError.statusCode).json({ err })
   return res.status(customError.statusCode).json({ msg: customError.msg })
 }
