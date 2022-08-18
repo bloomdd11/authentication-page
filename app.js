@@ -1,8 +1,12 @@
 require('dotenv').config()
 require('express-async-errors')
+const Axios = require('axios')
 
 const express = require('express')
 const app = express()
+
+// template engine
+app.set('view engine', 'ejs')
 
 // connect db
 const connectDB = require('./db/connectDB')
@@ -20,7 +24,7 @@ app.use(express.json())
 
 // routes
 app.get('/', (req, res) => {
-  res.send('server is running')
+  res.render('index', { header: "Authentication Page", axios: Axios })
 })
 
 app.use('/api/v1/auth', AuthRouter)
