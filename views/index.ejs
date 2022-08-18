@@ -13,11 +13,15 @@
 <body>
   <h1>Authentication Page</h1>
   <form method="post">
+    Name : <input type="text" name="name" id="name" required>
     Email: <input type="email" name="email" id="email" required>
     Password: <input type="password" name="password" id="password" required>
   </form>
   <button type="submit" id="submit">Login</button>
+  <button type="submit" id="register">Register</button>
   <button id="viewUsers">View Users</button>
+
+  <div id="users"> </div>
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
@@ -28,43 +32,98 @@
     const authUrl = 'http://localhost:3000/api/v1/auth'
     const jobUrl = 'http://localhost:3000/api/v1/job'
 
-    $("#submit").click(async (e) => {
-      let email = $("#email").val()
-      let password = $("#password").val()
-      try {
-        const { data: { token, username } } = await axios.post(authUrl + '/login', { email, password })
-        console.log("username : " + username);
-        console.log("token : " + token);
-      } catch (error) {
-        const { response: { data } } = error
-        console.log(data);
+    // register user
+    $(document).ready(() => {
+      const register = async () => {
+        let name = $("#name").val()
+        let email = $("#email").val()
+        let password = $("#password").val()
+
+        try {
+          const { data: { token, username } } = await axios.post(authUrl + "/register", { name, email, password })
+          viewUsers()
+          console.log("username : " + username + "\ntoken : " + token);
+        } catch (error) {
+          const { response: { data } } = error
+          console.log(data);
+        }
+        $("#name").val(' ')
+        $("#email").val(' ')
+        $("#password").val(' ')
+
       }
-    })
 
-    const login = async (email, password) => {
-      await axios.post(authUrl + '/login', { email, password })
-        .then((res) => {
-          return res
-        })
-    }
+      // login user
+      const login = async () => {
+        let email = $("#email").val()
+        let password = $("#password").val()
+        try {
+          const { data: { token, username } } = await axios.post(authUrl + '/login', { email, password })
+          console.log("username : " + username + "\ntoken : " + token);
+        } catch (error) {
+          const { response: { data } } = error
+          console.log(data);
+        }
+        $("#name").val(' ')
+        $("#email").val(' ')
+        $("#password").val(' ')
+      }
 
-    let data = []
-    const viewUser = async () => {
-      axios.get(authUrl + '/view')
-        .then((res) => {
-          const { data: users } = res
-          //console.log(users);
-          data = [...users]
-        })
-        .catch(err => console.log(err))
+      // view user
+      const viewUsers = async () => {
+        let users = []
+        await axios.get(authUrl + '/view')
+          .then(res => {
+            const { data } = res
+            users = [...data]
+          })
+        setTimeout(() => {
+          $("#users").text(' ')
+          console.log(users);
+          if (users.length === 0) {
+            let noUser = $("<p></p>").text("There is no user")
+            $("#users").append(noUser)
+          } else {
+            users.forEach(item => {
+              const { _id: userId, name, email, password } = item
+              let div = $("<div></div>")
+              let userDiv = `              
+              <p>id : ${userId}</p>
+              <p>name : ${name}</p>
+              <p>email : ${email}</p>
+              <p>password : ${password}</p>
+              <button class="deleteUser" value="${userId}" >delete</button>            
+              <hr>
+              `
+              div.html(userDiv)
+              $("#users").append(div)
+            })
+          }
+        }, 1000)
+      }
 
-    }
+      // handlers
+      $("#register").click(register)
+      $("#submit").click(login)
+      $("#viewUsers").click(viewUsers)
 
-    $("#viewUsers").click(() => {
-      viewUser()
-      setTimeout(() => {
-        console.log(data);
-      }, 1000)
+      // delete user
+      $("body").on("click", ".deleteUser", (e) => {
+        const { currentTarget } = e
+        const userId = currentTarget.value
+        try {
+          axios.delete(authUrl + `/${userId}`)
+            .then(res => {
+              const { status } = res
+              if (status == 200) {
+                viewUsers()
+                console.log(`${userId} is deleted. `);
+              }
+            })
+        } catch (error) {
+          console.log(error);
+        }
+      })
     })
   </script>
 </body>

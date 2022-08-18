@@ -44,8 +44,21 @@ const viewUser = async (req, res) => {
   return res.json(user)
 }
 
+const remove = async (req, res) => {
+  let { id: userId } = req.params
+
+  const user = await User.findByIdAndDelete({ _id: userId })
+
+  if (!user) {
+    throw new customAPIError(`no user with id : ${userId}`, 400)
+  }
+
+  return res.json({ msg: "done" })
+}
+
 module.exports = {
   register,
   login,
-  viewUser
+  viewUser,
+  remove
 }

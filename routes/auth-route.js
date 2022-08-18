@@ -4,11 +4,13 @@ const Router = express.Router()
 const {
   register,
   login,
-  viewUser
+  viewUser,
+  remove
 } = require('../controllers/auth')
 
 Router.route('/register').post(register)
 Router.route('/login').post(login)
+Router.route('/:id').delete(remove)
 Router.route('/view').get(viewUser)
 
 
